@@ -11,7 +11,8 @@
     "modules" : ["cocos2d","extensions","external"],
 
     "jsList" : [
-        "src/resource.js",
-        "src/app.js"
+        "src/resource2.js",
+        
+        "src/app2.js"
     ]
 }

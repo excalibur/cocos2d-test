@@ -152,6 +152,7 @@ var listener2 = cc.EventListener.create({
 var scene;
 
 var HelloWorldScene = cc.Scene.extend({
+    world: null,
     onEnter:function () {
         this._super();
         // var layer = new cc.Layer();
@@ -170,10 +171,6 @@ var HelloWorldScene = cc.Scene.extend({
         // 
         // 
 
-        console.log(scene);
-        // 获取英雄
-        var hero = ccs.armatureDataManager.getAnimationData("girl");
-        
         // hero.play("loading"); 
         // cc.eventManager.addListener(listener2, hero);
 
@@ -181,10 +178,209 @@ var HelloWorldScene = cc.Scene.extend({
         cc.eventManager.addListener(heroListener, scene);
 
         // cc.eventManager.addListener(listener2, scene);
+        // var layer = new Box2DTestLayer();
+        // this.addChild(layer);
+        // scene.addChild(layer);
+        // 
+        // 
+        // 
+        // box2d 尝试
+
+         var b2Vec2 = Box2D.Common.Math.b2Vec2
+            , b2BodyDef = Box2D.Dynamics.b2BodyDef
+            , b2Body = Box2D.Dynamics.b2Body
+            , b2FixtureDef = Box2D.Dynamics.b2FixtureDef
+            , b2World = Box2D.Dynamics.b2World
+            , b2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape;
+
+        var screenSize = cc.director.getWinSize();
+        //UXLog(L"Screen width %0.2f screen height %0.2f",screenSize.width,screenSize.height);
+
+
+
+
+      
+        // 创建一个box2d的世界
+        this.world = new b2World(new b2Vec2(0, -10), true);
+
+        // this.world.SetContinuousPhysics(true);
+
+        // var b2DebugDraw = Box2D.Dynamics.b2DebugDraw;
+        // var debugDraw = new b2DebugDraw();
+        // var canvas = document.createElement("canvas");
+        // canvas.id = "box2d";
+        // canvas.width = document.getElementById('gameCanvas').width;
+        // canvas.height = document.getElementById('gameCanvas').height;
+        // document.getElementById("Cocos2dGameContainer").appendChild(canvas);
+        // debugDraw.SetSprite(canvas
+        //         .getContext("2d"));
+        // debugDraw.SetDrawScale(30);
+        // debugDraw.SetFillAlpha(1);
+        // debugDraw.SetFlags(b2DebugDraw.e_shapeBit);
+        // this.world.SetDebugDraw(debugDraw);
+
+
+        var fixDef = new b2FixtureDef;
+        fixDef.density = 1.0;
+        fixDef.friction = 0.5;
+        fixDef.restitution = 0.2;
+
+        var bodyDef = new b2BodyDef;
+
+        // 32px = 1米
+        //create ground
+        bodyDef.type = b2Body.b2_staticBody;
+        fixDef.shape = new b2PolygonShape;
+        fixDef.shape.SetAsBox(screenSize.width / PTM_RATIO + 2, 2);
+        // upper
+        bodyDef.position.Set(screenSize.width / PTM_RATIO + 2, screenSize.height / PTM_RATIO + 1.8);
+        this.world.CreateBody(bodyDef).CreateFixture(fixDef);
+        // bottom
+        bodyDef.position.Set(screenSize.width / PTM_RATIO + 2, 4.6);
+        this.world.CreateBody(bodyDef).CreateFixture(fixDef);
+
+        fixDef.shape.SetAsBox(2, screenSize.height / PTM_RATIO + 1.8);
+        // left
+        bodyDef.position.Set(-1.8, screenSize.height / PTM_RATIO + 1.8);
+        this.world.CreateBody(bodyDef).CreateFixture(fixDef);
+        // right
+        bodyDef.position.Set(screenSize.width / PTM_RATIO + 1.8 , screenSize.height / PTM_RATIO + 1.8);
+        this.world.CreateBody(bodyDef).CreateFixture(fixDef);
+
+        //Set up sprite
+
+        var hero = scene.getChildByTag(10005);
+        var mon = scene.getChildByTag(10006);
+        // 设置英雄的大小
+        // 
+        // this.addHero(hero);
+        // 
+        var herobodyDef = new Box2D.Dynamics.b2BodyDef;
+        herobodyDef.type = Box2D.Dynamics.b2Body.b2_dynamicBody;
+
+        var herofixDef = new Box2D.Dynamics.b2FixtureDef;
+
+        //define basic parameters
+        herofixDef.density = 1.0;
+        herofixDef.friction = 0.5;
+        herofixDef.restitution = 0.2;
+        herofixDef.isSensor = false;
+        herofixDef.userData = hero;
+        
+
+
+        //define shape
+        herofixDef.shape = new Box2D.Collision.Shapes.b2CircleShape(5);
+
+
+        this.world.CreateBody(herobodyDef).CreateFixture(herofixDef);
+        // 怪物
+        // this.addNewSpriteWithCoords(mon);
+        // this.addChild(hero, 1);
+
+        // this.addChild(mon, 2);
+
+        this.world.SetContactListener(listener);
+       
+
+
+        
 
         this.addChild(scene);
 
+        this.addNewSpriteWithCoords(cc.p(screenSize.width / 2, screenSize.height / 2));
+        this.scheduleUpdate();
 
+
+    },
+    addNewSpriteWithCoords:function (sprite) {
+        console.log("-----------");
+       
+    
+        // console.log(sprite.tag == 10006);
+
+        // Define the dynamic body.
+        //Set up a 1m squared box in the physics world
+        var b2BodyDef = Box2D.Dynamics.b2BodyDef
+            , b2Body = Box2D.Dynamics.b2Body
+            , b2FixtureDef = Box2D.Dynamics.b2FixtureDef
+            , b2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape;
+
+        var bodyDef = new b2BodyDef();
+        bodyDef.type = b2Body.b2_dynamicBody;
+        bodyDef.position.Set(sprite.x / 32, 4.6);
+        bodyDef.userData = sprite;
+        var body = this.world.CreateBody(bodyDef);
+
+        // Define another box shape for our dynamic body.
+        var dynamicBox = new b2PolygonShape();
+        dynamicBox.SetAsBox(0.5, 0.5);//These are mid points for our 1m box
+
+        // Define the dynamic body fixture.
+        var fixtureDef = new b2FixtureDef();
+        fixtureDef.shape = dynamicBox;
+        fixtureDef.density = 1.0;
+        fixtureDef.friction = 0.8;
+        body.CreateFixture(fixtureDef);
+
+
+    },
+    addHero:function (sprite) {
+        console.log("-----222------");
+       
+    
+        // console.log(sprite.tag == 10006);
+
+        // Define the dynamic body.
+        //Set up a 1m squared box in the physics world
+        var b2BodyDef = Box2D.Dynamics.b2BodyDef
+            , b2Body = Box2D.Dynamics.b2Body
+            , b2FixtureDef = Box2D.Dynamics.b2FixtureDef
+            , b2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape;
+
+        var bodyDef = new b2BodyDef();
+        bodyDef.type = b2Body.b2_staticBody;
+        // bodyDef.position.Set(2, 8);
+        bodyDef.userData = sprite;
+        var body = this.world.CreateBody(bodyDef);
+
+        // Define another box shape for our dynamic body.
+        var dynamicBox = new b2PolygonShape();
+        dynamicBox.SetAsBox(5, 5);//These are mid points for our 1m box
+
+        // Define the dynamic body fixture.
+        var fixtureDef = new b2FixtureDef();
+        fixtureDef.shape = dynamicBox;
+        fixtureDef.density = 1.0;
+        fixtureDef.friction = 0.8;
+        body.CreateFixture(fixtureDef);
+
+
+    },
+    // box2d 重力
+    update:function (dt) {
+        //It is recommended that a fixed time step is used with Box2D for stability
+        //of the simulation, however, we are using a variable time step here.
+        //You need to make an informed choice, the following URL is useful
+        //http://gafferongames.com/game-physics/fix-your-timestep/
+        var velocityIterations = 8;
+        var positionIterations = 1;
+
+        // Instruct the world to perform a single step of simulation. It is
+        // generally best to keep the time step and iterations fixed.
+        this.world.Step(dt, velocityIterations, positionIterations);
+
+        //Iterate over the bodies in the physics world
+        for (var b = this.world.GetBodyList(); b; b = b.GetNext()) {
+            if (b.GetUserData() != null) {
+                //Synchronize the AtlasSprites position and rotation with the corresponding body
+                var myActor = b.GetUserData();
+      
+                myActor.x = b.GetPosition().x * PTM_RATIO;
+                myActor.y = b.GetPosition().y * PTM_RATIO;
+                myActor.rotation = -1 * cc.radiansToDegress(b.GetAngle());
+            }
+        }
 
     }
 });
@@ -211,7 +407,7 @@ var heroListener = cc.EventListener.create({
         // run.play("run");
 
         var scene = cc.director.getRunningScene();
-
+ 
         var hero = scene.getChildByTag(10000).getChildByTag(10005).getChildren()[0];
         var mon = scene.getChildByTag(10000).getChildByTag(10006).getChildren()[0];
         
@@ -283,37 +479,12 @@ var heroListener = cc.EventListener.create({
                 heroAn.play("attack");
                 hero.scheduleOnce(this.setup.bind(this), 0.8);
 
-                 // 添加碰撞检测，不加第二个参数，默认为每帧执行一次
-                scene.schedule(this.updateGame,0.8);
+                
                 this.flag = false;
 
-                var gravity = new Box2D.Common.Math.b2Vec2()
-                var world = new Box2D.Dynamics.b2World(gravity);
+                
 
-                var bodyDef = new Box2D.Dynamics.b2BodyDef;
-                bodyDef.type = Box2D.Dynamics.b2Body.b2_dynamicBody;
-
-
-                var fixDef = new Box2D.Dynamics.b2FixtureDef;
-                //define basic parameters
-                fixDef.density = 1.0;
-                fixDef.friction = 0.5;
-                fixDef.restitution = 0.2;
-                fixDef.isSensor = false;
-
-                fixDef.shape = new Box2D.Collision.Shapes.b2CircleShape(80 / 45);
-
-                bodyDef.position.x =  2;
-                bodyDef.position.y =  2;
-                var hedgehogBody = world.CreateBody(bodyDef);
-                hedgehogBody.CreateFixture(fixDef);
-
-
-                var listener = new Box2D.Dynamics.b2ContactListener;
-
-                listener.BeginContact = function(contact) {
-                    console.log("--------111-----------");
-                }
+               
                 break;
             };
             case 88:{
@@ -416,3 +587,15 @@ var heroListener = cc.EventListener.create({
         }
     }
 }, this);
+
+
+
+var listener = new Box2D.Dynamics.b2ContactListener;
+// 监听碰撞事件
+listener.BeginContact = function(contact) {
+        console.log("*********************");
+
+        // 获取碰撞物体
+        console.log(contact.GetFixtureA().GetBody().GetUserData());
+        console.log(contact.GetFixtureB().GetBody().GetUserData());
+}

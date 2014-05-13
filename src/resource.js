@@ -1,6 +1,7 @@
 var res = {
     CloseNormal_png : "res/CloseNormal.png",
     CloseSelected_png : "res/CloseSelected.png",
+    s_pathBlock : "res/blocks.png",
 
     // 背景
     Bg_png : "res/publish/img/bg1.png",
@@ -38,7 +39,7 @@ var g_resources = [
     // res.CloseNormal_png,
     // res.CloseSelected_png,
 
-
+    res.s_pathBlock,
     // res.Bg_png,
 
     res.s_Hero_png,

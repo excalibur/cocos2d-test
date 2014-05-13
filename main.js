@@ -5,6 +5,9 @@ cc.game.onStart = function(){
     //load resources
     cc.LoaderScene.preload(g_resources, function () {
         cc.director.runScene(new HelloWorldScene());
+        // var box2d = new Box2DTestLayer()
+        // cc.director.runScene(box2d);
+        // box2d.world.SetContactListener(listener);
   //       scene = ccs.sceneReader.createNodeWithSceneFile(res.s_FightScene_json);
   //       cc.director.runScene(scene);
 
